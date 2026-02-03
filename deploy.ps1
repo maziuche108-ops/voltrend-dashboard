@@ -26,6 +26,12 @@ Write-Host "Copying PWA files..."
 Copy-Item "manifest.json" $distDir
 Copy-Item "sw.js" $distDir
 
+# Copy assets directory
+if (Test-Path "assets") {
+    Write-Host "Copying assets..."
+    Copy-Item -Recurse "assets" $distDir
+}
+
 # Copy _sdk directory
 Write-Host "Copying SDKs..."
 Copy-Item -Recurse $sdkDir $distDir
