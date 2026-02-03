@@ -21,6 +21,11 @@ New-Item -ItemType Directory -Force -Path $distDir | Out-Null
 Write-Host "Copying index.html..."
 Copy-Item $indexFile $distDir
 
+# Copy PWA files
+Write-Host "Copying PWA files..."
+Copy-Item "manifest.json" $distDir
+Copy-Item "sw.js" $distDir
+
 # Copy _sdk directory
 Write-Host "Copying SDKs..."
 Copy-Item -Recurse $sdkDir $distDir

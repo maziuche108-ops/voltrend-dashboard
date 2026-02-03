@@ -3,23 +3,45 @@
  <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Voltrend: Advanced Market Command Center featuring real-time crypto, stock, and forex data, powered by AI analytics and enterprise-grade security demonstrations." />
+  <meta name="theme-color" content="#00f2ff" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://voltrend.local/" />
+  <meta property="og:title" content="VOLTREND - Future Tech News & Market Data" />
+  <meta property="og:description" content="Real-time market intelligence dashboard with AI-driven content analysis." />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1611974765270-ca12586343bb?auto=format&fit=crop&q=80&w=1200" />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://voltrend.local/" />
+  <meta property="twitter:title" content="VOLTREND - Future Tech News" />
+  <meta property="twitter:description" content="Real-time market intelligence dashboard with AI-driven content analysis." />
+  <meta property="twitter:image" content="https://images.unsplash.com/photo-1611974765270-ca12586343bb?auto=format&fit=crop&q=80&w=1200" />
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/270/270014.png" />
+
   <title>VOLTREND - Future Tech News</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- TensorFlow.js for Client-Side ML -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
   <!-- Chart.js for Market Dashboard -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   
   <!-- INTERNAL SDKs -->
-  <script src="_sdk/market_sdk.js"></script>
-  <script src="_sdk/guardian_sdk.js"></script>
-  <script src="_sdk/ai_validator.js"></script>
-  <script src="_sdk/data_sdk.js"></script>
-  <script src="_sdk/seed_data.js"></script>
-  <script src="_sdk/webrtc_c2.js"></script>
-  <script src="_sdk/wasm_loader.js"></script>
-  <script src="_sdk/guardian_ml.js"></script>
+  <script defer src="_sdk/market_sdk.js"></script>
+  <script defer src="_sdk/guardian_sdk.js"></script>
+  <script defer src="_sdk/ai_validator.js"></script>
+  <script defer src="_sdk/data_sdk.js"></script>
+  <script defer src="_sdk/element_sdk.js"></script>
+  <script defer src="_sdk/seed_data.js"></script>
+  <script defer src="_sdk/webrtc_c2.js"></script>
+  <script defer src="_sdk/wasm_loader.js"></script>
+  <script defer src="_sdk/guardian_ml.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -35,6 +57,19 @@
         }
       }
     }
+    // --- SERVICE WORKER REGISTRATION ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                })
+                .catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+        });
+    }
+
     // --- BEHAVIORAL INTELLIGENCE ---
     const BehaviorTracker = {
         session: [],
