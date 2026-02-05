@@ -1,11 +1,11 @@
-# Voltrend - Future Tech Market Command Center
+# TechCronch - Future Tech Market Command Center
 
-Voltrend is a next-generation market intelligence dashboard featuring real-time data simulation, AI-driven content analysis, and enterprise-grade security demonstrations.
+TechCronch is a next-generation market intelligence dashboard featuring real-time data simulation, AI-driven content analysis, and enterprise-grade security demonstrations.
 
 ## Features
 
 - **Real-Time Market Data**: Live updates for Crypto, Forex, and Stocks via `MarketSDK`.
-- **AI Validator**: Integrated AI service validation system with real-time diagnostics.
+- **AI Validator**: Integrated service validation system with real-time diagnostics.
 - **GhostNet Security**: Simulated enterprise VPN/Traffic obfuscation interface.
 - **Advanced Filtering**: Filter events by category, impact, and country.
 - **Interactive Charts**: Powered by Chart.js with dynamic timeframes.

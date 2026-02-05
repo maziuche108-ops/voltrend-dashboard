@@ -28,7 +28,8 @@ window.UserInsightEngine = {
 
 window.BehaviorTracker = {
     init: () => console.log('Behavior Tracker initialized'),
-    track: (action, details) => console.log('Tracked:', action, details)
+    track: (action, details) => console.log('Tracked:', action, details),
+    trackPageView: (path) => console.log('Page View Tracked:', path)
 };
 
 window.GuardianSDK.validateXSS = () => {

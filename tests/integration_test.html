@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Integration Tests</title>
+    <style>
+        body { font-family: monospace; background: #111; color: #0f0; padding: 20px; }
+        .pass { color: #0f0; }
+        .fail { color: #f00; }
+        .pending { color: #cc0; }
+    </style>
+</head>
+<body>
+    <h1>System Integration Tests</h1>
+    <ul id="results"></ul>
+
+    <!-- Load SDKs -->
+    <script src="../_sdk/guardian_ml.js"></script>
+    <script src="../_sdk/rotation_manager.js"></script>
+
+    <script>
+        // Test Harness
+        const runTest = async (name, fn) => {
+            const el = document.createElement('li');
+            el.textContent = `[PENDING] ${name}`;
+            el.className = 'pending';
+            document.getElementById('results').appendChild(el);
+            
+            try {
+                await fn();
+                el.textContent = `[PASS] ${name}`;
+                el.className = 'pass';
+            } catch (e) {
+                el.textContent = `[FAIL] ${name}: ${e.message}`;
+                el.className = 'fail';
+                console.error(e);
+            }
+        };
+
+        // Override Init for Test Path
+        window.GuardianML.init = async () => {
+            if (window.GuardianML.isInitialized) return;
+            console.log('Initializing Worker with Test Path...');
+            window.GuardianML.worker = new Worker('../_sdk/ai_worker.js');
+            
+            window.GuardianML.worker.onmessage = (e) => {
+                const { id, success, data, error } = e.data;
+                const promise = window.GuardianML.pending.get(id);
+                if (promise) {
+                    if (success) promise.resolve(data);
+                    else promise.reject(new Error(error));
+                    window.GuardianML.pending.delete(id);
+                }
+            };
+            
+            await window.GuardianML.send('INIT');
+            window.GuardianML.isInitialized = true;
+        };
+
+        // Run Tests
+        (async () => {
+            // 1. AI Worker Tests
+            await runTest('GuardianML Initialization (Worker)', async () => {
+                await window.GuardianML.init();
+                if (!window.GuardianML.isInitialized) throw new Error('Flag not set');
+            });
+
+            await runTest('GuardianML Health Check', async () => {
+                const health = await window.GuardianML.getHealth();
+                if (health.status !== 'ONLINE') throw new Error('Health check failed');
+            });
+
+            await runTest('GuardianML Processing (Sentiment)', async () => {
+                const res = await window.GuardianML.process({ type: 'sentiment', content: 'This is good news' });
+                if (res.result.label !== 'POSITIVE') throw new Error('Wrong sentiment result');
+            });
+
+            // 2. Rotation Manager Tests
+            await runTest('RotationManager Lifecycle', async () => {
+                return new Promise((resolve, reject) => {
+                    const rm = new RotationManager({ interval: 50 });
+                    let count = 0;
+                    
+                    rm.addTask('counter', async () => {
+                        count++;
+                        if (count === 3) {
+                            rm.stop();
+                            resolve();
+                        }
+                    });
+                    
+                    rm.start();
+                    // Timeout safety
+                    setTimeout(() => {
+                        if (count < 3) reject(new Error('Counter did not reach target'));
+                    }, 1000);
+                });
+            });
+
+            // 3. Service Worker Capability
+            await runTest('Service Worker API Support', async () => {
+                if (!('serviceWorker' in navigator)) throw new Error('Browser does not support Service Workers');
+            });
+
+        })();
+    </script>
+</body>
+</html>
